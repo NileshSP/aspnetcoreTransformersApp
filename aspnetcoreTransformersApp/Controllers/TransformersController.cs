@@ -36,7 +36,7 @@ namespace aspnetcoreTransformersApp.Controllers
         /// <summary>
         /// Action faciliates addition of new Transformer entity
         /// </summary>
-        /// <param name="transformer">Transformer enity to add in request body as json format</param>
+        /// <param name="transformer">Transformer</param>
         /// <returns>string</returns>
         [HttpPost("[action]")]
         public async Task<IActionResult> Add([FromBody] Transformer transformer)
@@ -44,42 +44,75 @@ namespace aspnetcoreTransformersApp.Controllers
             return await _transfromerAdd.ExecuteAdd(transformer);
         }
 
+        /// <summary>
+        /// Action faciliates retrieval of Tansformer entity
+        /// </summary>
+        /// <param name="transformerId">int</param>
+        /// <returns>Transformer</returns>
         [HttpGet("[action]/{transformerId}")]
         public async Task<IActionResult> Retrieve(int transformerId)
         {
             return await _transformerRetrieve.ExecuteRetrieve(transformerId);
         }
 
+        /// <summary>
+        /// Action faciliates update to existing Transformer 
+        /// </summary>
+        /// <param name="transformer">Transformer</param>
+        /// <param name="transformerId">int</param>
+        /// <returns>string</returns>
         [HttpPut("[action]/{transformerId}")]
         public async Task<IActionResult> Update([FromBody] Transformer transformer, int transformerId)
         {
             return await _transformerUpdate.ExecuteUpdate(transformer, transformerId);
         }
 
+        /// <summary>
+        /// Action faciliates removal/deletion of Transformer
+        /// </summary>
+        /// <param name="transformerId">int</param>
+        /// <returns>string</returns>
         [HttpDelete("[action]/{transformerId}")]
         public async Task<IActionResult> Remove(int transformerId)
         {
             return await _transformerRemove.ExecuteRemove(transformerId);
         }
 
+        /// <summary>
+        /// Action faciliates for result of autobot sorted list of transformers
+        /// </summary>
+        /// <returns>List<Transformer></returns>
         [HttpGet("[action]")]
         public async Task<IActionResult> AutobotSortedList()
         {
             return await _transformerList.ExecuteList(TransformersEnums.TransformerAllegiances.Autobot.ToString(), true);
         }
 
+        /// <summary>
+        /// Action faciliates for result of decpticon sorted list of transformers
+        /// </summary>
+        /// <returns>List<Transformer></returns>
         [HttpGet("[action]")]
         public async Task<IActionResult> DecepticonSortedList()
         {
             return await _transformerList.ExecuteList(TransformersEnums.TransformerAllegiances.Decepticon.ToString(), true);
         }
 
+        /// <summary>
+        /// Action faciliates for getting score of a particular Transformer
+        /// </summary>
+        /// <param name="transformerId">int</param>
+        /// <returns>object</returns>
         [HttpGet("[action]/{transformerId}")]
         public async Task<IActionResult> Score(int transformerId)
         {
             return await _transformerScore.ExecuteScore(transformerId);
         }
 
+        /// <summary>
+        /// Action faciliates execution of war between autobot & decepticon for returing output with results
+        /// </summary>
+        /// <returns>object</returns>
         [HttpGet("[action]")]
         public async Task<IActionResult> War()
         {
