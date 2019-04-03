@@ -28,7 +28,7 @@ namespace aspnetcoreTransformersApp.Models
         Task<int> TransformerRemove(int transformerId);
         Task<List<Transformer>> TransformersList(Func<Transformer, bool> whereClause);
         Task<List<TransformerAllegiance>> TransformerAllegianceList(Func<TransformerAllegiance, bool> whereClause);
-        Task<int> TransformerScore(int TransformerId);
+        Task<int> TransformerScore(dynamic paramObject, string spConfigPath);
     }
 
     public interface ITransformerAdd
@@ -53,6 +53,7 @@ namespace aspnetcoreTransformersApp.Models
 
     public interface ITransformerList
     {
+        List<Transformer> TransformerListWithAllegianceValue(List<Transformer> sortedList, TransformerAllegiance tAllegiance);
         Task<SortedList<string, Transformer>> TransformersListForAllegiance(TransformerAllegiance transformerAllegiance);
         Task<IActionResult> ExecuteList(string Allegiance, bool sorted);
     }

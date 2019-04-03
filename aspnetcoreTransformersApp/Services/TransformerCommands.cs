@@ -124,7 +124,7 @@ namespace aspnetcoreTransformersApp.Services
                         Transformer botToUpdate = await _transformerRepository.getTransformer(s => s.TransformerId == transformerId);
                         if (botToUpdate != null)
                         {
-                            botToUpdate.AllegianceId = transformerAllegiance.TransformerAllegianceId;
+                            botToUpdate.AllegianceId = transformer.AllegianceId;
                             botToUpdate.Name = transformer.Name;
                             botToUpdate.Strength = transformer.Strength;
                             botToUpdate.Intelligence = transformer.Intelligence;
@@ -164,7 +164,7 @@ namespace aspnetcoreTransformersApp.Services
             {
                 int resultVal = await _transformerRepository.TransformerRemove(transformerId);                   
                 response = (resultVal > 0 
-                                ? new OkObjectResult($"Transformer with TransformerId={transformerId} was removed/deleted succesfully") 
+                                ? new OkObjectResult($"Transformer with TransformerId={transformerId} was removed/deleted successfully") 
                                 : new ObjectResult($"Transformer with TransformerId={transformerId} was not removed/deleted")
                             );
             }
@@ -197,6 +197,17 @@ namespace aspnetcoreTransformersApp.Services
         }
 
         /// <summary>
+        /// Updates the Transformer entity with TransformerAllegiance object
+        /// </summary>
+        /// <param name="sortedList">List<Transformer></param>
+        /// <param name="tAllegiance">TransformerAllegiance</param>
+        /// <returns></returns>
+        public List<Transformer> TransformerListWithAllegianceValue(List<Transformer> sortedList, TransformerAllegiance tAllegiance)
+        {
+            return sortedList.Select(s => { s.Allegiance = new List<TransformerAllegiance>() { tAllegiance }; return s; }).ToList();
+        }
+
+        /// <summary>
         /// Returns Transformers list for particular allegiance in specified (Asc/Desc)ordered list
         /// </summary>
         /// <param name="AllegianceId">Transformer Allegiance Id</param>
@@ -209,15 +220,13 @@ namespace aspnetcoreTransformersApp.Services
             {
                 TransformerAllegiance transformerAllegiance = await _transformerRepository.getTransformerAllegiance(s => s.AllegianceName.ToLower().Trim().Contains(Allegiance.ToLower().Trim()));
                 SortedList<string, Transformer> sortedTransformers = await TransformersListForAllegiance(transformerAllegiance);
-                Func<List<Transformer>, TransformerAllegiance, List<Transformer>> getTransformerListWithAllegianceValue = (sortedList, tAllegiance) =>
-                      sortedList.Select(s => { s.Allegiance = new List<TransformerAllegiance>() { tAllegiance }; return s; }).ToList();
                 if (sorted)
                 {
-                    response = new OkObjectResult(getTransformerListWithAllegianceValue(sortedTransformers.Select(s => s.Value).ToList<Transformer>(), transformerAllegiance));
+                    response = new OkObjectResult(TransformerListWithAllegianceValue(sortedTransformers.Select(s => s.Value).ToList<Transformer>(), transformerAllegiance));
                 }
                 else
                 {
-                    response = new OkObjectResult(getTransformerListWithAllegianceValue(sortedTransformers.Reverse().Select(s => s.Value).ToList<Transformer>(), transformerAllegiance));
+                    response = new OkObjectResult(TransformerListWithAllegianceValue(sortedTransformers.Reverse().Select(s => s.Value).ToList<Transformer>(), transformerAllegiance));
                 }
 
             }
@@ -241,7 +250,12 @@ namespace aspnetcoreTransformersApp.Services
                 Transformer transformer = await _transformerRepository.getTransformer(s => s.TransformerId == transformerId);
                 if (transformer != null)
                 {
-                    var score = await _transformerRepository.TransformerScore(transformerId);
+                    dynamic paramObject = new
+                    {
+                        Name = "transformerid",
+                        Value = transformerId
+                    };
+                    var score = await _transformerRepository.TransformerScore(paramObject, "StoredProcedures:Score");
                     response = new OkObjectResult(new { TransformerId = transformerId, Score = score });
                 }
                 else
@@ -251,7 +265,7 @@ namespace aspnetcoreTransformersApp.Services
             }
             catch (Exception ex)
             {
-                response = new ObjectResult(ex);
+                response = new ObjectResult($"error occured : {ex.Message}" );
             }
             return response;
         }

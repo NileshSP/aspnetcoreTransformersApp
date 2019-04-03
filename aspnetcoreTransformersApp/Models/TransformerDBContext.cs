@@ -19,6 +19,11 @@ namespace aspnetcoreTransformersApp.Models
 
     public static class ModelBuilderExtensions
     {
+        /// <summary>
+        /// Generate seed(initial) data for the application
+        /// </summary>
+        /// <param name="context"></param>
+        /// <returns>TransformerDBContext</returns>
         public static Task SeedData(this TransformerDBContext context)
         {
             return Task.Run(() =>
@@ -52,9 +57,20 @@ namespace aspnetcoreTransformersApp.Models
             });
         }
 
-        public static Task<List<Transformer>> getTransformers(TransformerDBContext context) {
+        /// <summary>
+        /// Returns rendom number between provided range
+        /// </summary>
+        /// <param name="min">int</param>
+        /// <param name="max">int</param>
+        /// <returns>int</returns>
+        public static Func<int, int, int> getRandomNumber = (int min, int max) => new Random().Next(1, 10);
 
-            Func<int, int, int> getRandomNumber = (int min, int max) => new Random().Next(1, 10);
+        /// <summary>
+        /// Returns arbitrary list of Transformers object to populate initial data
+        /// </summary>
+        /// <param name="context">TransformerDBContext</param>
+        /// <returns>List<Transformer></returns>
+        public static Task<List<Transformer>> getTransformers(TransformerDBContext context) {
 
             return Task.Run(() => context
                                     .TransformerAllegiances
@@ -83,6 +99,11 @@ namespace aspnetcoreTransformersApp.Models
            );
         }
 
+        /// <summary>
+        /// Translates and returns integer number to text representation
+        /// </summary>
+        /// <param name="number"></param>
+        /// <returns>string</returns>
         public static string NumberToWords(int number)
         {
             if (number == 0)

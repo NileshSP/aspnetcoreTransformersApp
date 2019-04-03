@@ -51,6 +51,11 @@ namespace aspnetcoreTransformersApp.Services
                             .FirstOrDefault();
         }
 
+        /// <summary>
+        /// Add Transformer object to database
+        /// </summary>
+        /// <param name="transformer">Transformer</param>
+        /// <returns>int</returns>
         public async Task<int> TransformerAdd(Transformer transformer)
         {
             return await _transformerDBContext.Transformers
@@ -59,11 +64,21 @@ namespace aspnetcoreTransformersApp.Services
                 .SaveChangesAsync();
         }
 
+        /// <summary>
+        /// Returns Transformer entity for specified Transformer Id from database
+        /// </summary>
+        /// <param name="transformerId">TransformerId</param>
+        /// <returns>Transformer</returns>
         public async Task<Transformer> TransformerRetrieve(int transformerId)
         {
             return await this.getTransformer(s => s.TransformerId == transformerId);
         }
 
+        /// <summary>
+        /// Updates Transformer entity in database
+        /// </summary>
+        /// <param name="transformer">Transformer</param>
+        /// <returns>int</returns>
         public async Task<int> TransformerUpdate(Transformer transformer)
         {
             return await _transformerDBContext
@@ -73,6 +88,11 @@ namespace aspnetcoreTransformersApp.Services
                         .SaveChangesAsync();
         }
 
+        /// <summary>
+        /// Removes Transformer entity from database for specified Transformer Id
+        /// </summary>
+        /// <param name="transformerId">TransformerId</param>
+        /// <returns>int</returns>
         public async Task<int> TransformerRemove(int transformerId)
         {
             Transformer transformer = await this.getTransformer(s => s.TransformerId == transformerId);
@@ -83,6 +103,11 @@ namespace aspnetcoreTransformersApp.Services
                         .SaveChangesAsync();
         }
 
+        /// <summary>
+        /// Returns Transformer entity list from database for specified filter clause
+        /// </summary>
+        /// <param name="whereClause">Func<Transformer, bool></param>
+        /// <returns>List<Transformer></returns>
         public async Task<List<Transformer>> TransformersList(Func<Transformer, bool> whereClause)
         {
             return await _transformerDBContext
@@ -92,6 +117,11 @@ namespace aspnetcoreTransformersApp.Services
                         .ToList<Transformer>();
         }
 
+        /// <summary>
+        /// Returns TransormerAllegiance entity list from database for specified filter clause
+        /// </summary>
+        /// <param name="whereClause">Func<TransformerAllegiance, bool></param>
+        /// <returns>List<TransformerAllegiance></returns>
         public async Task<List<TransformerAllegiance>> TransformerAllegianceList(Func<TransformerAllegiance, bool> whereClause)
         {
             return await _transformerDBContext
@@ -101,20 +131,25 @@ namespace aspnetcoreTransformersApp.Services
                         .ToList<TransformerAllegiance>();
         }
 
-        public async Task<int> TransformerScore(int transformerId)
+        /// <summary>
+        /// Returns Tranformer score from database using stored procedure using Dapper(ORM) package
+        /// </summary>
+        /// <param name="transformerIdParamObject">dynamic</param>
+        /// <param name="spConfigPath">string</param>
+        /// <returns>int</returns>
+        public async Task<int> TransformerScore(dynamic transformerIdParamObject, string spConfigPath)
         {
             int Score = 0;
             using (var conn = _transformerDBContext.DatabaseContext.Database.GetDbConnection())
             {
                 conn.Open();
-                var configPath = "StoredProcedures:Score";
-                var spFromConfig = _config.GetSection(configPath).GetChildren().ToList();
+                var spFromConfig = _config.GetSection(spConfigPath).GetChildren().ToList();
                 string spName = spFromConfig[0].Value;
                 DynamicParameters spParams = new DynamicParameters();
                 spFromConfig.Skip(1).ToList().ForEach(item => {
-                    if (item.Value.ToString().ToLower().Trim().Contains("transformerid"))
+                    if (item.Value.ToString().ToLower().Trim().Contains(transformerIdParamObject.Name))
                     {
-                        spParams.Add($"@{item.Value}", transformerId);
+                        spParams.Add($"@{item.Value}", transformerIdParamObject.Value);
                     }
                 });
                 Score = await conn.ExecuteScalarAsync<int>(spName, spParams, commandType: CommandType.StoredProcedure);
