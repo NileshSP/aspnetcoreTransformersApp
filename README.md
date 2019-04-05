@@ -34,7 +34,7 @@ OR
 
 <br/>
 
-Once the project is build and run, a browser page would be presented with navigation options on right wherein `Web Api's` option contains functionality related to data access from sql database
+Once the project is build and run, a browser page would be presented with navigation menu options wherein `Web Api's` option contains functionality related to data access from sql database
 
 
 ![alt text](https://github.com/NileshSP/aspnetcoreTransformersApp/blob/master/screenshot.gif "Working example..")
