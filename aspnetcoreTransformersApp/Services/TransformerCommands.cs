@@ -250,12 +250,14 @@ namespace aspnetcoreTransformersApp.Services
                 Transformer transformer = await _transformerRepository.getTransformer(s => s.TransformerId == transformerId);
                 if (transformer != null)
                 {
+                    List<dynamic> paramList = new List<dynamic>();
                     dynamic paramObject = new
                     {
                         Name = "transformerid",
                         Value = transformerId
                     };
-                    var score = await _transformerRepository.TransformerScore(paramObject, "StoredProcedures:Score");
+                    paramList.Add(paramObject);
+                    var score = await _transformerRepository.TransformerScore(paramList, "StoredProcedures:Score");
                     response = new OkObjectResult(new { TransformerId = transformerId, Score = score });
                 }
                 else

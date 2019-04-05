@@ -137,22 +137,31 @@ namespace aspnetcoreTransformersApp.Services
         /// <param name="transformerIdParamObject">dynamic</param>
         /// <param name="spConfigPath">string</param>
         /// <returns>int</returns>
-        public async Task<int> TransformerScore(dynamic transformerIdParamObject, string spConfigPath)
+        public async Task<int> TransformerScore(List<dynamic> spParamList, string spConfigPath)
         {
             int Score = 0;
             using (var conn = _transformerDBContext.DatabaseContext.Database.GetDbConnection())
             {
                 conn.Open();
                 var spFromConfig = _config.GetSection(spConfigPath).GetChildren().ToList();
-                string spName = spFromConfig[0].Value;
-                DynamicParameters spParams = new DynamicParameters();
-                spFromConfig.Skip(1).ToList().ForEach(item => {
-                    if (item.Value.ToString().ToLower().Trim().Contains(transformerIdParamObject.Name))
+                if (spFromConfig.Count > 0)
+                {
+                    string spName = spFromConfig[0]?.Value;
+                    if (!string.IsNullOrEmpty(spName))
                     {
-                        spParams.Add($"@{item.Value}", transformerIdParamObject.Value);
+                        DynamicParameters spParams = new DynamicParameters();
+                        spFromConfig.Skip(1).ToList().ForEach(item =>
+                        {
+                            spParamList.ForEach(param => {
+                                if (item.Value.ToString().ToLower().Trim().Contains(param.Name))
+                                {
+                                    spParams.Add($"@{item.Value}", param.Value);
+                                }
+                            });
+                        });
+                        Score = await conn.ExecuteScalarAsync<int>(spName, spParams, commandType: CommandType.StoredProcedure);
                     }
-                });
-                Score = await conn.ExecuteScalarAsync<int>(spName, spParams, commandType: CommandType.StoredProcedure);
+                }
             }
             return Score;
         }

@@ -166,7 +166,7 @@ namespace aspnetcoreTransformersApp.Services
                         finalResult["WarOutcome"] = $"War tied up between TeamA & TeamB with {countB} victories";
                     }
 
-                    finalResult.Victories = getWarRemainders(transformerVictoryList);
+                    finalResult.Victors = getWarRemainders(transformerVictoryList);
                     finalResult.Survivors = getWarRemainders(transformerSurvivorList);
 
                     finalResult = jsonSerialize(finalResult);

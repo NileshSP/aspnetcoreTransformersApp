@@ -103,7 +103,7 @@ namespace aspnetcoreTransformerApp.Test
             get
             {
                 yield return new TestCaseData(new Transformer { AllegianceId = 1, Courage = 1, Endurance = 1, Firepower = 1, Intelligence = 1, Rank = 1, Skill = 1, Speed = 1, Strength = 1, Name = "Autobot - six" }).Returns("Transformer added succesfully").SetName("TransfomerAdd - add new case");
-                yield return new TestCaseData(new Transformer { AllegianceId = 1, Courage = 1, Endurance = 1, Firepower = 1, Intelligence = 1, Rank = 1, Skill = 1, Speed = 1, Strength = 1, Name = "Autobot - one" }).Returns("Autobot - one with Autobot already exists !!").SetName("TransfomerAdd - existing add case");
+                yield return new TestCaseData(new Transformer { AllegianceId = 1, Courage = 1, Endurance = 1, Firepower = 1, Intelligence = 1, Rank = 1, Skill = 1, Speed = 1, Strength = 1, Name = "Autobot - one" }).Returns("Autobot - one with Autobot already exists !!").SetName("TransfomerAdd - returns appropriate message while adding existing transformer as new");
             }
         }
 
@@ -129,6 +129,16 @@ namespace aspnetcoreTransformerApp.Test
             get
             {
                 yield return new TestCaseData(1).Returns("Transformer with TransformerId=1 was removed/deleted successfully").SetName("TransformerRemove - deletes/removes transformer");
+            }
+        }
+
+        public static IEnumerable TransformerScoreCases
+        {
+            get
+            {
+                yield return new TestCaseData(1).Returns("error occured : Relational-specific methods can only be used when the context is using a relational database provider.").SetName("TransformerScore - returns expected message");
+                //yield return new TestCaseData(1).Returns(new { TransformerId = 1, Score = 45 }).SetName("TransformerScore - returns expected score");
+                //yield return new TestCaseData(15).Returns("Transformer with TransformerId=15 not found").SetName("TransformerScore - returns expected not found message");
             }
         }
     }

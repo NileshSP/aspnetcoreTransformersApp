@@ -10,6 +10,7 @@ using System.Collections.Generic;
 using Microsoft.AspNetCore.Mvc;
 using System.Threading.Tasks;
 using System.Linq;
+using Newtonsoft.Json.Linq;
 
 namespace aspnetcoreTransformersTests
 {
@@ -167,36 +168,43 @@ namespace aspnetcoreTransformersTests
         }
 
         [Test, Order(7)]
-        public void TransformerScoreNotNull()
+        [TestCaseSource(typeof(TransformerTestCases), "TransformerScoreCases")]
+        public async Task<object> TransformerScore(int transformerId)
         {
-            Transformer transformer = _transformerRepository.getTransformer(s => s.Name.Trim() != "").GetAwaiter().GetResult();
-            int sampleScore = transformer.Courage + transformer.Endurance + transformer.Firepower + transformer.Intelligence + transformer.Rank + transformer.Skill + transformer.Speed + transformer.Strength;
+            Transformer transformer;
+            transformer = await _transformerRepository.getTransformer(s => s.TransformerId == transformerId);
+            int sampleScore = (transformer != null ? transformer.Courage + transformer.Endurance + transformer.Firepower + transformer.Intelligence + transformer.Rank + transformer.Skill + transformer.Speed + transformer.Strength : 0);
             var result = _transformersController.Score(transformer.TransformerId).GetAwaiter().GetResult();
             var okObjectResult = result as OkObjectResult;
             var objectResult = result as ObjectResult;
             if (okObjectResult != null)
             {
-                dynamic resultValue = okObjectResult.Value;
-                Assert.NotNull(resultValue);
-                Assert.IsTrue(resultValue.Score == sampleScore);
+                dynamic resultValue = okObjectResult.Value as JObject;
+                Assert.NotNull(resultValue, "Result output is null or not a json");
+                Assert.IsTrue(resultValue.Score == sampleScore, "Scores doesn't match");
+                return resultValue;
             }
             else
             {
                 string resultText = objectResult.Value as string;
-                Assert.NotNull(resultText);
+                Assert.NotNull(resultText, "message is empty");
+                return resultText;
             }
         }
 
         [Test, Order(8)]
-        public void TransformerWarNotNullOrError()
+        public void TransformerWar()
         {
             var result = _transformersController.War().GetAwaiter().GetResult();
             var okObjectResult = result as OkObjectResult;
             var objectResult = result as ObjectResult;
             if (okObjectResult != null)
             {
-                dynamic resultValue = okObjectResult.Value;
-                Assert.NotNull(resultValue);
+                var resultValue = okObjectResult.Value as JObject;
+                Assert.NotNull(resultValue,"Result is not Json output");
+                Assert.IsTrue(resultValue.ContainsKey("Victors"), "Result doesn't have victors list");
+                Assert.IsTrue(resultValue.ContainsKey("Survivors"), "Result doesn't have survivors list");
+                Assert.NotNull(resultValue, "Result is not Json output");
             }
             else
             {
