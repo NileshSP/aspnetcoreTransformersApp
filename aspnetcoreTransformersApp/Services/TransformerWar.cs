@@ -84,20 +84,20 @@ namespace aspnetcoreTransformersApp.Services
                     {
                         var candidateVal = candidate.ToLower().Trim();
 
-                        transformerA = getTransformerWithAllegianceValue(transformerA, transformerAllegiances);
-                        transformerB = getTransformerWithAllegianceValue(transformerB, transformerAllegiances);
+                        if (transformerA != null) transformerA = getTransformerWithAllegianceValue(transformerA, transformerAllegiances);
+                        if (transformerB != null) transformerB = getTransformerWithAllegianceValue(transformerB, transformerAllegiances);
 
                         if (candidateVal != "none")
                         {
                             if (candidateVal == "a")
                             {
-                                transformerVictoryList.Add(transformerA);
-                                transformerSurvivorList.Add(transformerB);
+                                if (transformerA != null) transformerVictoryList.Add(transformerA);
+                                if (transformerB != null) transformerSurvivorList.Add(transformerB);
                             }
                             else
                             {
-                                transformerVictoryList.Add(transformerB);
-                                transformerSurvivorList.Add(transformerA);
+                                if (transformerB != null) transformerVictoryList.Add(transformerB);
+                                if (transformerA != null) transformerSurvivorList.Add(transformerA);
                             }
                             countA = (candidateVal == "a" ? countA + 1 : countA);
                             countB = (candidateVal == "b" ? countB + 1 : countB);
@@ -125,7 +125,14 @@ namespace aspnetcoreTransformersApp.Services
                         count++;
                         resultCandidate = "none";
 
-                        // If the war is between optimus and predaking
+                        // if either of the bot is not available to carry out war
+                        if (transformerA == null || transformerB == null)
+                        {
+                            resultCandidate = (transformerA == null ? "B" : "A");
+                            appendResult(transformerA, transformerB, resultCandidate, $"Transformer{resultCandidate} is survivor as other transformer doesn't exist", count);
+                        }
+
+                        // if the war is between optimus and predaking
                         Transformer transformerOptimusOrPredaking = await IsOptimusOrPreDaking(transformerA, transformerB);
                         if (transformerOptimusOrPredaking.TransformerId != 0)
                         {
