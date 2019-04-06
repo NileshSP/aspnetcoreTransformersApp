@@ -1,7 +1,9 @@
 ﻿using aspnetcoreTransformersApp.Models;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -27,34 +29,40 @@ namespace aspnetcoreTransformersApp.Services
             IActionResult response;
             try
             {
-                if (transformer.Name.ToLower().Trim() == "string")
+                var validationResults = new List<ValidationResult>();
+                var isValid = Validator.TryValidateObject(transformer, new ValidationContext(transformer, serviceProvider: null, items: null), validationResults);
+
+                if (!isValid)
                 {
-                    response = new ObjectResult($"Transformer name cannot be {transformer.Name}");
-                }
-                else if (transformer.Name.ToLower().Trim().Contains("optimus")
-                    && transformer.Name.ToLower().Trim().Contains("prime")
-                        && transformer.AllegianceId == (_transformerRepository
-                                                            .getTransformerAllegiance(s => s.AllegianceName.ToLower().Trim().Contains("decepticon")))
-                                                            .GetAwaiter().GetResult().TransformerAllegianceId) // Is decepticon ?
-                {
-                    response = new ObjectResult("Optimus prime cannot be decepticon");
+                    response = new ObjectResult(string.Join(", ", validationResults.Select(s => s.ErrorMessage))) {   StatusCode = StatusCodes.Status412PreconditionFailed    };
                 }
                 else
                 {
-                    Transformer transformerExistCheck = await _transformerRepository
-                                                                   .getTransformer(s => (s.Name.ToLower().Trim() == transformer.Name.ToLower().Trim()
-                                                                                             && s.AllegianceId == transformer.AllegianceId
-                                                                                        )
-                                                                                   );
-                    if (transformerExistCheck != null)
+                    if (transformer.Name.ToLower().Trim().Contains("optimus")
+                        && transformer.Name.ToLower().Trim().Contains("prime")
+                            && transformer.AllegianceId == (_transformerRepository
+                                                                .getTransformerAllegiance(s => s.AllegianceName.ToLower().Trim().Contains("decepticon")))
+                                                                .GetAwaiter().GetResult().TransformerAllegianceId) // Is decepticon ?
                     {
-                        TransformerAllegiance transformerAllegianceType = await _transformerRepository.getTransformerAllegiance(s => s.TransformerAllegianceId == transformer.AllegianceId);
-                        response = new ObjectResult($"{transformer.Name} with {transformerAllegianceType.AllegianceName} already exists !!");
+                        response = new ObjectResult("Optimus prime cannot be decepticon");
                     }
                     else
                     {
-                        int returnVal = await _transformerRepository.TransformerAdd(transformer);
-                        response = (returnVal > 0 ? new OkObjectResult("Transformer added succesfully") : new ObjectResult("Transformer was not added"));
+                        Transformer transformerExistCheck = await _transformerRepository
+                                                                       .getTransformer(s => (s.Name.ToLower().Trim() == transformer.Name.ToLower().Trim()
+                                                                                                 && s.AllegianceId == transformer.AllegianceId
+                                                                                            )
+                                                                                       );
+                        if (transformerExistCheck != null)
+                        {
+                            TransformerAllegiance transformerAllegianceType = await _transformerRepository.getTransformerAllegiance(s => s.TransformerAllegianceId == transformer.AllegianceId);
+                            response = new ObjectResult($"{transformer.Name} with {transformerAllegianceType.AllegianceName} already exists !!");
+                        }
+                        else
+                        {
+                            int returnVal = await _transformerRepository.TransformerAdd(transformer);
+                            response = (returnVal > 0 ? new OkObjectResult("Transformer added succesfully") : new ObjectResult("Transformer was not added"));
+                        }
                     }
                 }
             }
@@ -103,44 +111,54 @@ namespace aspnetcoreTransformersApp.Services
             IActionResult response;
             try
             {
-                TransformerAllegiance transformerAllegiance = await _transformerRepository.getTransformerAllegiance(s => s.TransformerAllegianceId == transformer.AllegianceId);
-                if (transformerAllegiance == null)
+                var validationResults = new List<ValidationResult>();
+                var isValid = Validator.TryValidateObject(transformer, new ValidationContext(transformer, serviceProvider: null, items: null), validationResults);
+
+                if (!isValid)
                 {
-                    response = new NotFoundObjectResult("Transformer allegiance not found!!");
+                    response = new ObjectResult(string.Join(", ", validationResults.Select(s => s.ErrorMessage))) { StatusCode = StatusCodes.Status412PreconditionFailed };
                 }
                 else
                 {
-                    Transformer transformerExistCheck = await _transformerRepository.getTransformer(s => (s.Name.ToLower().Trim() == transformer.Name.ToLower().Trim()
-                                                                                                            && s.AllegianceId == transformer.AllegianceId
-                                                                                                          )
-                                                                                                   );
-                    if (transformerExistCheck != null)
+                    TransformerAllegiance transformerAllegiance = await _transformerRepository.getTransformerAllegiance(s => s.TransformerAllegianceId == transformer.AllegianceId);
+                    if (transformerAllegiance == null)
                     {
-                        TransformerAllegiance transformerAllegianceType = await _transformerRepository.getTransformerAllegiance(s => s.TransformerAllegianceId == transformer.AllegianceId);
-                        response = new ObjectResult($"{transformer.Name} with {transformerAllegianceType.AllegianceName} already exists and hence cannot be updated !!");
+                        response = new NotFoundObjectResult("Transformer allegiance not found!!");
                     }
                     else
                     {
-                        Transformer botToUpdate = await _transformerRepository.getTransformer(s => s.TransformerId == transformerId);
-                        if (botToUpdate != null)
+                        Transformer transformerExistCheck = await _transformerRepository.getTransformer(s => (s.Name.ToLower().Trim() == transformer.Name.ToLower().Trim()
+                                                                                                                && s.AllegianceId == transformer.AllegianceId
+                                                                                                              )
+                                                                                                       );
+                        if (transformerExistCheck != null)
                         {
-                            botToUpdate.AllegianceId = transformer.AllegianceId;
-                            botToUpdate.Name = transformer.Name;
-                            botToUpdate.Strength = transformer.Strength;
-                            botToUpdate.Intelligence = transformer.Intelligence;
-                            botToUpdate.Speed = transformer.Speed;
-                            botToUpdate.Endurance = transformer.Endurance;
-                            botToUpdate.Rank = transformer.Rank;
-                            botToUpdate.Courage = transformer.Courage;
-                            botToUpdate.Firepower = transformer.Firepower;
-                            botToUpdate.Skill = transformer.Skill;
-
-                            int returnVal = await _transformerRepository.TransformerUpdate(botToUpdate);
-                            response = (returnVal > 0 ? new OkObjectResult("Transformer updated successfully") : new ObjectResult("Transformer was not updated"));
+                            TransformerAllegiance transformerAllegianceType = await _transformerRepository.getTransformerAllegiance(s => s.TransformerAllegianceId == transformer.AllegianceId);
+                            response = new ObjectResult($"{transformer.Name} with {transformerAllegianceType.AllegianceName} already exists and hence cannot be updated !!");
                         }
                         else
                         {
-                            response = new NotFoundObjectResult($"Transformer with TransformerId = {transformerId} not found!!");
+                            Transformer botToUpdate = await _transformerRepository.getTransformer(s => s.TransformerId == transformerId);
+                            if (botToUpdate != null)
+                            {
+                                botToUpdate.AllegianceId = transformer.AllegianceId;
+                                botToUpdate.Name = transformer.Name;
+                                botToUpdate.Strength = transformer.Strength;
+                                botToUpdate.Intelligence = transformer.Intelligence;
+                                botToUpdate.Speed = transformer.Speed;
+                                botToUpdate.Endurance = transformer.Endurance;
+                                botToUpdate.Rank = transformer.Rank;
+                                botToUpdate.Courage = transformer.Courage;
+                                botToUpdate.Firepower = transformer.Firepower;
+                                botToUpdate.Skill = transformer.Skill;
+
+                                int returnVal = await _transformerRepository.TransformerUpdate(botToUpdate);
+                                response = (returnVal > 0 ? new OkObjectResult("Transformer updated successfully") : new ObjectResult("Transformer was not updated"));
+                            }
+                            else
+                            {
+                                response = new NotFoundObjectResult($"Transformer with TransformerId = {transformerId} not found!!");
+                            }
                         }
                     }
                 }
