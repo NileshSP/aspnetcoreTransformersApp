@@ -137,7 +137,7 @@ namespace aspnetcoreTransformersApp.Services
         /// <param name="transformerIdParamObject">dynamic</param>
         /// <param name="spConfigPath">string</param>
         /// <returns>int</returns>
-        public async Task<int> TransformerScore(List<dynamic> spParamList, string spConfigPath)
+        public async Task<int> TransformerScoreDB(List<dynamic> spParamList, string spConfigPath)
         {
             int Score = 0;
             using (var conn = _transformerDBContext.DatabaseContext.Database.GetDbConnection())
@@ -165,6 +165,14 @@ namespace aspnetcoreTransformersApp.Services
             }
             return Score;
         }
+
+        /// <summary>
+        /// Returns Tranformer score from aggregated properties of Transformer entity
+        /// </summary>
+        /// <param name="transformer">Transformer</param>
+        /// <returns>Task<int></returns>
+        public async Task<int> TransformerScore(Transformer transformer) 
+            => await Task.FromResult<int>(transformer.Courage + transformer.Endurance + transformer.Firepower + transformer.Intelligence + transformer.Rank + transformer.Skill + transformer.Speed + transformer.Strength);
 
         protected void Dispose(bool disposing)
         {

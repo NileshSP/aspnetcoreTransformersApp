@@ -283,15 +283,12 @@ namespace aspnetcoreTransformersApp.Services
         /// <param name="teamACandidate"></param>
         /// <param name="teamBCandidate"></param>
         /// <returns>string</returns>
-        private Task<string> HigherOverAllRating(Transformer teamACandidate, Transformer teamBCandidate)
+        private async Task<string> HigherOverAllRating(Transformer teamACandidate, Transformer teamBCandidate)
         {
-            Func<Transformer, int> getOverAllScore = (transformer) => (transformer.Courage + transformer.Endurance + transformer.Firepower
-                + transformer.Intelligence + transformer.Rank + transformer.Skill + transformer.Speed + transformer.Strength);
-
             string result = "none";
 
-            int transformerAscore = getOverAllScore(teamACandidate);
-            int transformerBscore = getOverAllScore(teamBCandidate);
+            int transformerAscore = await _transformerRepository.TransformerScore(teamACandidate);
+            int transformerBscore = await _transformerRepository.TransformerScore(teamBCandidate);
 
             if (transformerAscore > transformerBscore)
             {
@@ -302,7 +299,7 @@ namespace aspnetcoreTransformersApp.Services
                 result = "B";
             }
 
-            return Task.FromResult(result);
+            return result;
         }
 
     }

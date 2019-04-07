@@ -28,7 +28,8 @@ namespace aspnetcoreTransformersApp.Models
         Task<int> TransformerRemove(int transformerId);
         Task<List<Transformer>> TransformersList(Func<Transformer, bool> whereClause);
         Task<List<TransformerAllegiance>> TransformerAllegianceList(Func<TransformerAllegiance, bool> whereClause);
-        Task<int> TransformerScore(List<dynamic> paramList, string spConfigPath);
+        Task<int> TransformerScoreDB(List<dynamic> paramList, string spConfigPath);
+        Task<int> TransformerScore(Transformer transformer);
     }
 
     public interface ITransformerAdd

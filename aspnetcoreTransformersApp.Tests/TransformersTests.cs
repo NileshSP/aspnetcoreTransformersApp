@@ -173,8 +173,8 @@ namespace aspnetcoreTransformersTests
         {
             Transformer transformer;
             transformer = await _transformerRepository.getTransformer(s => s.TransformerId == transformerId);
-            int sampleScore = (transformer != null ? transformer.Courage + transformer.Endurance + transformer.Firepower + transformer.Intelligence + transformer.Rank + transformer.Skill + transformer.Speed + transformer.Strength : 0);
-            var result = _transformersController.Score(transformer.TransformerId).GetAwaiter().GetResult();
+            int sampleScore = (transformer != null ? await _transformerRepository.TransformerScore(transformer) : 0);
+            var result = await _transformersController.Score(transformer.TransformerId);
             var okObjectResult = result as OkObjectResult;
             var objectResult = result as ObjectResult;
             if (okObjectResult != null)
@@ -204,7 +204,6 @@ namespace aspnetcoreTransformersTests
                 Assert.NotNull(resultValue,"Result is not Json output");
                 Assert.IsTrue(resultValue.ContainsKey("Victors"), "Result doesn't have victors list");
                 Assert.IsTrue(resultValue.ContainsKey("Survivors"), "Result doesn't have survivors list");
-                Assert.NotNull(resultValue, "Result is not Json output");
             }
             else
             {

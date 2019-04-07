@@ -275,7 +275,7 @@ namespace aspnetcoreTransformersApp.Services
                         Value = transformerId
                     };
                     paramList.Add(paramObject);
-                    var score = await _transformerRepository.TransformerScore(paramList, "StoredProcedures:Score");
+                    var score = await _transformerRepository.TransformerScoreDB(paramList, "StoredProcedures:Score");
                     response = new OkObjectResult(new { TransformerId = transformerId, Score = score });
                 }
                 else
